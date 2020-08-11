@@ -61,6 +61,11 @@ func setupRouter() *gin.Engine {
 		c.BindJSON(&loadbalancer)
 		if loadbalancer.Name != "" {
 			loadbalancer.ID = uuid.New().String()
+
+			if loadbalancer.Status == "" {
+				loadbalancer.Status = "Active"
+			}
+
 			database = append(database, loadbalancer)
 			c.JSON(http.StatusCreated, loadbalancer)
 		} else {
