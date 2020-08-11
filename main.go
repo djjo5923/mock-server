@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 var database []LoadBalancer
@@ -16,7 +17,7 @@ type LoadBalancer struct {
 
 func initDatabase() {
 	lb := LoadBalancer{
-		ID:     "default-loadbalancer-id",
+		ID:     uuid.New().String(),
 		Name:   "loadbalancer 01",
 		Status: "Active",
 	}
@@ -58,14 +59,10 @@ func setupRouter() *gin.Engine {
 	r.POST("/loadbalancers", func(c *gin.Context) {
 		var loadbalancer LoadBalancer
 		c.BindJSON(&loadbalancer)
-		if loadbalancer.ID != "" && loadbalancer.Name != "" && loadbalancer.Status != "" {
-			_, ok := getLoadBalancerByID(loadbalancer.ID)
-			if !ok {
-				database = append(database, loadbalancer)
-				c.JSON(http.StatusCreated, loadbalancer)
-			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": "duplicate"})
-			}
+		if loadbalancer.Name != "" {
+			loadbalancer.ID = uuid.New().String()
+			database = append(database, loadbalancer)
+			c.JSON(http.StatusCreated, loadbalancer)
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "no value"})
 		}
